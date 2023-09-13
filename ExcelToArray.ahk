@@ -1,10 +1,6 @@
-﻿; v1.1 (2018-7-19)
-; https://github.com/tmplinshi/ExcelToArray
-
-ExcelToArray(FileName, nSheet := 1, last_row := "", last_column := "")
-{
-	return ExcelToArray.DoIt(FileName, nSheet, last_row, last_column)
-}
+﻿; v1.0 (2023-9-13)
+; https://github.com/ForgetTheFox/ExcelToArray
+; Forked from: https://github.com/tmplinshi/ExcelToArray
 
 class ExcelToArray
 {
@@ -12,7 +8,7 @@ class ExcelToArray
 	{
 		if !FileExist(FileName)
 			throw, "File Not Exist!"
-		
+
 		safeArr := this.GetSafeArrFromXlFile(FileName, nSheet, last_row, last_column)
 		ret := this.SafeArr_To_AHKArr(safeArr)
 		return ret
@@ -49,31 +45,45 @@ class ExcelToArray
 		}
 	}
 
+	FormatNumber(n)
+	{
+		; Wenn die Zahl eine Ganzzahl ist, gib sie als Ganzzahl zurück. Andernfalls gib sie als Fließkommazahl zurück.
+		return (Mod(n, 1) = 0) ? Round(n) : n
+	}
+	
+
 	SafeArr_To_AHKArr(SafeArr)
 	{
 		ret := []
-
+	
 		rowCount := SafeArr.MaxIndex(1)
 		colCount := SafeArr.MaxIndex(2)
-
+	
 		Loop, % rowCount
 		{
 			row := A_Index
-
+	
 			arr := []
 			Loop, % colCount
-				arr.push( SafeArr[row, A_Index] )
-
+			{
+				value := SafeArr[row, A_Index]
+				; Überprüfe, ob der Wert eine Zahl ist und formatiere ihn entsprechend
+				if (value is number)
+					value := this.FormatNumber(value)
+				arr.push(value)
+			}
+	
 			ret.push(arr)
 		}
-
+	
 		return ret
 	}
+	
 
 	GetSafeArr(oWorkbook, nSheet := 1, last_row := "", last_column := "")
 	{
 		sheet := oWorkbook.Sheets(nSheet)
-
+	
 		if last_row && last_column
 			lastCell := {row: last_row, column: last_column}
 		else
@@ -86,8 +96,8 @@ class ExcelToArray
 		}
 		cell_begin := sheet.cells(1, 1)
 		cell_end   := sheet.cells(lastCell.row, lastCell.column)
-
-		return safeArr := sheet.Range(cell_begin, cell_end).FormulaR1C1
+		
+		return safeArr := sheet.Range(cell_begin, cell_end).Value
 	}
 
 	GetFullPath(FileName)
@@ -109,6 +119,10 @@ class ExcelToArray
 
 		lastRow := oWorkbook.Sheets(sheet).Cells.Find("*", , , , xlByRows   , xlPrevious).Row
 		lastCol := oWorkbook.Sheets(sheet).Cells.Find("*", , , , xlByColumns, xlPrevious).Column
+
+		return {row: lastRow, column: lastCol}
+	}
+}
 
 		return {row: lastRow, column: lastCol}
 	}
