@@ -16,7 +16,7 @@ Example of output array:
 ]
 ```
 
-Note: This function uses `sheet.Range(cell_begin, cell_end).FormulaR1C1` (instead of `.Value`) to read the data, it can avoids the numbers such as `1.2` converted into `1.200000`. But if the cell contains formula, the formula code itself will be read, not the actual value.
+Note: This function uses `sheet.Range(cell_begin, cell_end).Value` (instead of `.FormulaR1C1`) to read the data, it reads numbers such as `1.2` into `1.200000`. Later it converts whole numbers into numbers, leaves the rest untouched. This way if the cell contains a formula, the formula code itself wont be read, but the actual value.
 
 **Related Function**
 - [Create excel file from array or listview](https://gist.github.com/tmplinshi/7e2d75794e58def0d43e)
